@@ -1,0 +1,20 @@
+---
+name: vault-init
+
+templates:
+  run: bin/run
+
+packages:
+- vault
+
+properties:
+  key-shares:
+    description: Number of key shares to split the generated master key into. This is the number of "unseal keys" to generate.
+    default: 12
+  key-threshold:
+    description: Number of key shares required to reconstruct the master key. This must be less than or equal to -key-shares.
+    default: 5
+  VAULT_ADDR:
+    description: Target vault server
+  clearly-nonprod-selfsigned-cert:
+    description: seriously don't do this in prod, im using it in sandbox

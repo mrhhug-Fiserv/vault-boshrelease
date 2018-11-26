@@ -1,0 +1,33 @@
+---
+name: consul_client
+
+templates:
+  config/consul_client.json.erb: config/consul_client.json
+  config/public.crt.erb: config/public.crt
+  config/private.key.erb: config/private.key
+  config/ca.cert.erb: config/ca.cert
+  bin/monit_debugger: bin/monit_debugger
+  bin/consul_client_ctl: bin/consul_client_ctl 
+
+consumes:
+- name: consul_servers
+  type: consul_servers
+
+packages:
+- consul
+
+properties:
+  log_level:
+    description: log level of the consul client
+  datacenter:
+    description: Set the datacepter property
+  encrypt:
+    description: preshared encryption key
+  sys_domain:
+    description: cloudfoundry sys domain
+  ca_certificate:
+    description: issuing ca
+  server_certificate:
+    description: public cert
+  server_key:
+    description: private key

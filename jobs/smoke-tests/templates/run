@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#run consul members first so if somone is failing, the operater will have some clues
+/var/vcap/packages/consul/consul members
+
+#return zero if we don't find someone failing
+! /var/vcap/packages/consul/consul members | grep -q failing

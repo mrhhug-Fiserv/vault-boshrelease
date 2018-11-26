@@ -1,0 +1,10 @@
+#!/bin/bash
+
+<% if false %>
+	<% if p("clearly-nonprod-selfsigned-cert") %>
+		echo <%= p("clearly-nonprod-selfsigned-cert") %> > /usr/local/share/ca-certificates/insecure.crt
+		update-ca-certificates --fresh
+	<% end %>
+<% end %> 
+export VAULT_ADDR=<%= p("VAULT_ADDR") %>
+/var/vcap/packages/vault/vault operator init --key-shares=<%= p('key-shares') %> --key-threshold=<%= p('key-threshold') %>

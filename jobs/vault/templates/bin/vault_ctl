@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+set -x
+
+SERVICENAME=vault
+RUN_DIR=/var/vcap/sys/run/$SERVICENAME
+LOG_DIR=/var/vcap/sys/log/$SERVICENAME
+PIDFILE=${RUN_DIR}/pid
+
+case $1 in
+
+  start)
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    exec /var/vcap/packages/vault/vault server \
+	-config=/var/vcap/jobs/$SERVICENAME/config/$SERVICENAME.hcl \
+	>>  $LOG_DIR/$SERVICENAME.stdout.log \
+	2>> $LOG_DIR/$SERVICENAME.stderr.log
+
+    ;;
+
+  stop)
+    kill `cat $PIDFILE`
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}" ;;
+
+esac

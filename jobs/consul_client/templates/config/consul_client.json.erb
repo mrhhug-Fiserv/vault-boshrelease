@@ -1,0 +1,24 @@
+<%
+	require 'json'
+	join_hosts = link('consul_servers').instances.collect { |server| server.address }
+	
+	config = {
+		server: false,
+		server_name: "#{name}-#{index}." + p("sys_domain"),
+		data_dir: '/var/vcap/store/vault/consul',
+		client_addr: '127.0.0.1',
+		retry_join: join_hosts,
+		log_level: p("log_level", "info"),
+                datacenter: p("datacenter", "dc1"),
+		encrypt: p("encrypt"),
+		enable_syslog: true,
+		key_file: '/var/vcap/jobs/consul_client/config/private.key',
+		cert_file: '/var/vcap/jobs/consul_client/config/public.crt',
+		ca_file: '/var/vcap/jobs/consul_client/config/ca.cert',
+		verify_incoming: true,
+		verify_outgoing: true,
+		ui: true
+	}
+%>
+<%= JSON.pretty_generate(config) %>
+

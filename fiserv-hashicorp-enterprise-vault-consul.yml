@@ -1,0 +1,114 @@
+---
+instance_groups:
+- name: vault-init
+  azs: ((azs))
+  lifecycle: errand
+  instances: 1
+  jobs:
+  - name: vault-init
+    release: fiserv-hashicorp-enterprise-vault-consul
+    properties:
+      key-shares: ((vault_key_shares))
+      key-threshold: ((vault_key_threshold))
+      VAULT_ADDR: ((vault_ADDR))
+  vm_type: ((vault_errand_vm_type))
+  stemcell: ubuntu-xenial
+  networks:
+  - name: ((pcf-services))
+- azs: ((azs))
+  instances: ((consul_server_instances))
+  jobs:
+  - name: consul_server
+    provides:
+      consul_servers:
+        as: consul_leaders
+        shared: true
+    release: fiserv-hashicorp-enterprise-vault-consul
+    properties:
+      datacenter: ((consul_datacenter_name))
+      log_level: ((consul_log_level))
+      encrypt: ((consul_encrypt_key)) # you can get a new one by running consul keygen
+      sys_domain: ((system-domain))
+      server_certificate: ((/wildcard_certificate.certificate))
+      server_key: ((/wildcard_certificate.private_key))
+      ca_certificate: ((/wildcard_certificate.ca))
+  - name: route_registrar
+    properties:
+      nats:
+        machines:
+        - <ips>
+        password: <ps>
+        port: 4222
+        user: nats
+      route_registrar:
+        routes:
+        - name: vault-consul
+          port: 8500
+          registration_interval: 20s
+          uris: ((consul_server_uri))
+    release: routing
+  - name: smoke-tests
+    release: fiserv-hashicorp-enterprise-vault-consul
+  name: consul_server
+  networks:
+  - name: ((pcf-services))
+  persistent_disk: ((vault_persistent_disk))
+  stemcell: ubuntu-xenial
+  vm_type: ((consul_vm_type))
+- azs: ((azs))
+  instances: ((vault_instances))
+  jobs:
+  - name: vault
+    release: fiserv-hashicorp-enterprise-vault-consul
+  - name: consul_client
+    release: fiserv-hashicorp-enterprise-vault-consul
+    consumes:
+      consul_servers: { from: consul_leaders }
+    release: fiserv-hashicorp-enterprise-vault-consul
+    properties:
+      datacenter: ((consul_datacenter_name))
+      log_level: ((consul_log_level))
+      encrypt: ((consul_encrypt_key)) # you can get a new one by running consul keygen
+      sys_domain: ((system-domain))
+      server_certificate: ((/wildcard_certificate.certificate))
+      server_key: ((/wildcard_certificate.private_key))
+      ca_certificate: ((/wildcard_certificate.ca))
+  - name: route_registrar
+    properties:
+      nats:
+        machines:
+        - <ips>
+        password: <ps>
+        port: 4222
+        user: nats
+      route_registrar:
+        routes:
+        - name: vault
+          port: 8200
+          registration_interval: 20s
+          uris: ((vault_server_uri))
+    release: routing
+  - name: smoke-tests
+    release: fiserv-hashicorp-enterprise-vault-consul
+  - name: all-vaults-are-unsealed
+    release: fiserv-hashicorp-enterprise-vault-consul
+  name: vault_server
+  networks:
+  - name: ((pcf-services))
+  stemcell: ubuntu-xenial
+  vm_type: ((vault_vm_type))
+name: fiserv-hashicorp-enterprise-vault-consul
+releases:
+- name: routing
+  version: latest
+- name: fiserv-hashicorp-enterprise-vault-consul
+  version: latest
+stemcells:
+- alias: ubuntu-xenial
+  os: ubuntu-xenial
+  version: latest
+update:
+  canaries: 1
+  canary_watch_time: 30000-300000
+  max_in_flight: 1
+  update_watch_time: 30000-300000

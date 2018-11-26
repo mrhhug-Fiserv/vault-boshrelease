@@ -1,0 +1,3 @@
+set -e
+mv consul_binary ${BOSH_INSTALL_TARGET}/consul
+chmod +x ${BOSH_INSTALL_TARGET}/consul

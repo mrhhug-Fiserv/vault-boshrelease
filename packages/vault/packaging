@@ -1,0 +1,4 @@
+set -e
+
+mv vault_binary ${BOSH_INSTALL_TARGET}/vault
+chmod +x ${BOSH_INSTALL_TARGET}/vault

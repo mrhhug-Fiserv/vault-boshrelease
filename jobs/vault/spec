@@ -1,0 +1,16 @@
+---
+name: vault
+
+templates:
+  config/vault.hcl.erb: config/vault.hcl
+  bin/monit_debugger: bin/monit_debugger
+  bin/vault_ctl: bin/vault_ctl
+
+consumes:
+- name: consul_servers
+  type: consul_servers
+
+packages:
+- vault
+
+properties: {}

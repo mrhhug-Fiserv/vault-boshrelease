@@ -1,0 +1,11 @@
+---
+name: all-vaults-are-unsealed
+name: all-vaults-are-unsealed
+
+templates:
+  run: bin/run
+
+packages:
+- vault
+
+properties: {}
